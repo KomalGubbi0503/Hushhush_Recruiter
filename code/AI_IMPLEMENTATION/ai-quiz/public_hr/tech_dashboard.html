@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Technical Dashboard</title>
+<style>
+body { font-family: Arial; padding: 20px; background: #eef2f7; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: top; }
+th { background: #007bff; color: white; }
+input { width: 60px; text-align: center; }
+button { padding: 5px 10px; margin: 2px; border-radius: 5px; cursor: pointer; }
+pre { background: #f8f9fa; padding: 5px; border: 1px solid #ddd; text-align: left; white-space: pre-wrap; word-wrap: break-word; }
+.question-block { margin-top: 10px; text-align: left; }
+</style>
+</head>
+<body>
+<h2>Technical Dashboard</h2>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Q1 Score</th>
+<th>Q2 Score</th>
+<th>Q3 Score</th>
+<th>Total</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="techTable"></tbody>
+</table>
+
+<script>
+async function fetchTech() {
+  const res = await fetch("/technical-dashboard");
+  const data = await res.json();
+  const tbody = document.getElementById("techTable");
+  tbody.innerHTML = "";
+
+  data.forEach(d => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        <strong>${d.candidate_name}</strong>
+        <div class="question-block">
+          <b>Q1:</b> ${d.q1 || "N/A"}<br>
+          <pre>${d.q1_code || ""}</pre>
+          <b>Q2:</b> ${d.q2 || "N/A"}<br>
+          <pre>${d.q2_code || ""}</pre>
+          <b>Q3:</b> ${d.q3 || "N/A"}<br>
+          <pre>${d.q3_code || ""}</pre>
+        </div>
+      </td>
+      <td><input type="number" value="${d.q1_score}" id="q1-${d.id}"></td>
+      <td><input type="number" value="${d.q2_score}" id="q2-${d.id}"></td>
+      <td><input type="number" value="${d.q3_score}" id="q3-${d.id}"></td>
+      <td>${d.total_score}</td>
+      <td><button onclick="updateScore(${d.id})">Update</button></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+async function updateScore(id) {
+  const q1 = document.getElementById(`q1-${id}`).value;
+  const q2 = document.getElementById(`q2-${id}`).value;
+  const q3 = document.getElementById(`q3-${id}`).value;
+
+  const res = await fetch("/update-scores", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({id,q1_score:q1,q2_score:q2,q3_score:q3})
+  });
+  const data = await res.json();
+  if (data.success) { alert("Updated!"); fetchTech(); }
+  else alert("Failed: " + data.error);
+}
+
+fetchTech();
+</script>
+</body>
+</html>

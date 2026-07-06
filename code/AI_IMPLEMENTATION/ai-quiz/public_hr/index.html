@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hiring Manager Dashboard</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #eef2f7; }
+    h2 { margin-bottom: 20px; }
+    .candidate { background: white; margin: 10px 0; padding: 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; }
+    .details { display: none; padding: 10px; margin-top: 10px; background: #f9f9f9; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background: #007bff; color: white; }
+    .actions { margin-top: 10px; }
+    button { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; margin-right: 8px; }
+    .select { background: #28a745; color: white; }
+    .reject { background: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <h2>Hiring Manager Dashboard</h2>
+  <div id="candidatesList"></div>
+
+  <script>
+    // ✅ Ensure HR is logged in
+    const role = localStorage.getItem("role");
+    if (!role || role !== "hr") {
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    // ✅ Fetch all candidate names
+    async function fetchCandidates() {
+      const res = await fetch("/candidates");
+      const data = await res.json();
+      const container = document.getElementById("candidatesList");
+      container.innerHTML = "";
+
+      data.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "candidate";
+        div.innerHTML = `
+          <strong>${c.candidate_name}</strong>
+          <div class="details" id="details-${c.candidate_name.replace(/\s+/g, '-')}"></div>
+        `;
+        div.addEventListener("click", () => toggleDetails(c.candidate_name));
+        container.appendChild(div);
+      });
+    }
+
+    // ✅ Toggle candidate details
+    async function toggleDetails(name) {
+      const detailsDiv = document.getElementById(`details-${name.replace(/\s+/g, '-')}`);
+      if (detailsDiv.style.display === "block") { 
+        detailsDiv.style.display = "none"; 
+        return; 
+      }
+
+      const res = await fetch(`/candidate-details/${name}`);
+      const d = await res.json();
+
+      detailsDiv.innerHTML = `
+        <table>
+          <tr><th colspan="2">Scores</th></tr>
+          <tr><td>Total</td><td>${d.total_score || 0}</td></tr>
+          <tr><td>Time Taken</td><td>${d.time_taken || "N/A"}</td></tr>
+          <tr><td>Status</td><td>${d.status || "Pending"}</td></tr>
+        </table>
+        <table>
+          <tr><th colspan="2">GitHub Metrics</th></tr>
+          <tr><td>Stars</td><td>${d.stars || 0}</td></tr>
+          <tr><td>Commits</td><td>${d.commits || 0}</td></tr>
+          <tr><td>Total Public Repos</td><td>${d.total_public_repos || 0}</td></tr>
+          <tr><td>Pull Requests</td><td>${d.pull_requests || 0}</td></tr>
+        </table>
+        <div class="actions">
+          <button class="select" onclick="updateStatus('${d.candidate_name}', 'Selected')">Select</button>
+          <button class="reject" onclick="updateStatus('${d.candidate_name}', 'Rejected')">Reject</button>
+        </div>
+      `;
+
+      detailsDiv.style.display = "block";
+    }
+
+    // ✅ Update status (HR select/reject)
+    async function updateStatus(candidate_name, status) {
+      try {
+        const res = await fetch("/update-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ candidate_name, status })
+        });
+        const data = await res.json();
+        alert(data.message || "Action completed");
+        fetchCandidates();
+      } catch (err) {
+        alert("Failed to update status: " + err.message);
+      }
+    }
+
+    // Load candidates on page load
+    fetchCandidates();
+  </script>
+</body>
+</html>
