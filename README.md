@@ -147,4 +147,4 @@ cd AI_emplimentation
 
 ## Authors
 
-Built by [Your Name] and [Friend's Name].
+Built by Komal GUbbi Deepak, Meghraj Shivakumar, Kavana, Razi .
