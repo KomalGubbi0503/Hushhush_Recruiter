@@ -147,4 +147,4 @@ cd AI_emplimentation
 
 ## Authors
 
-Built by Komal GUbbi Deepak, Meghraj Shivakumar, Kavana, Razi .
+Built by Komal Gubbi Deepak, Meghraj Shivakumar, Kavana, Razi .
