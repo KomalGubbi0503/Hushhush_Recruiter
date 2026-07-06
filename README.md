@@ -77,7 +77,7 @@ Final Output: Ranked shortlist + assessment scores on dashboard
 |---------------------------|----------------------------------------------|
 | Data Collection            | Python, GitHub API                          |
 | Data Processing            | Python (Pandas/NumPy-based feature engineering) |
-| Machine Learning            | Scikit-learn, PCA                          |
+| Machine Learning            | Kmeans, PCA, logistic regression                         |
 | Code Assessment Engine      | LLM-based code analysis                    |
 | Dashboard                  | Web-based hiring dashboard                  |
 | Data Storage                | MySQL                                       |
